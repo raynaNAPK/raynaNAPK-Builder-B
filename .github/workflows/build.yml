@@ -17,7 +17,7 @@ jobs:
           gradle-version: 8.0
       - run: gradle wrapper --gradle-version 8.0
       - run: chmod +x gradlew
-      - run:./gradlew :app:assembleDebug
+      - run: ./gradlew :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: Builder-B-APK
