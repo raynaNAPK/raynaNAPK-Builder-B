@@ -1,0 +1,1 @@
+package com.raynanapk.builder; import android.app.Activity; import android.os.Bundle; import android.widget.*; public class MainActivity extends Activity{protected void onCreate(Bundle b){super.onCreate(b); TextView t=new TextView(this); t.setText("Builder B Ready - Build APK!"); setContentView(t);}}
