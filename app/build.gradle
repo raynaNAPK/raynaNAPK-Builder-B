@@ -1,7 +1,6 @@
 plugins {
     id "com.android.application"
 }
-
 android {
     namespace "com.raynanapk.builder"
     compileSdk 34
@@ -9,15 +8,15 @@ android {
         applicationId "com.raynanapk.builder"
         minSdk 24
         targetSdk 34
-        versionCode 5
-        versionName "5.0"
+        versionCode 6
+        versionName "6.0-AppMint"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 }
-
 dependencies {
     implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "com.android.tools.build:apksig:8.1.0"
 }
