@@ -76,9 +76,9 @@ public class MainActivity extends Activity {
     }
     void showBuilderV9(){
         LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(18,22,18,18); root.setBackgroundColor(Color.parseColor("#0F111A"));
-        TextView title=new TextView(this); title.setText("Builder B V9.8\nFIX 10-21 HURUF - 100% INSTALL!"); title.setTextSize(14); title.setTextColor(Color.parseColor("#00D084")); title.setGravity(Gravity.CENTER);
+        TextView title=new TextView(this); title.setText("Builder B V9.9\nFIX UTAMA - 21 CHAR ALL ENCODING!"); title.setTextSize(13); title.setTextColor(Color.parseColor("#00D084")); title.setGravity(Gravity.CENTER);
         appNameInput=new EditText(this); appNameInput.setHint("App Name"); appNameInput.setText("dadu"); appNameInput.setTextColor(Color.WHITE); appNameInput.setBackgroundColor(Color.parseColor("#1A1D2E")); appNameInput.setPadding(10,10,10,10);
-        packageInput=new EditText(this); packageInput.setHint("com.sigit.dadu (10-21)"); packageInput.setText("com.sigit.dadu"); packageInput.setTextColor(Color.parseColor("#00D084")); packageInput.setBackgroundColor(Color.parseColor("#1A1D2E")); packageInput.setPadding(10,10,10,10);
+        packageInput=new EditText(this); packageInput.setHint("com.sigit.dadu (auto 21)"); packageInput.setText("com.sigit.dadu"); packageInput.setTextColor(Color.parseColor("#00D084")); packageInput.setBackgroundColor(Color.parseColor("#1A1D2E")); packageInput.setPadding(10,10,10,10);
         bannerInput=new EditText(this); bannerInput.setHint("Banner ID"); bannerInput.setTextColor(Color.WHITE); bannerInput.setBackgroundColor(Color.parseColor("#1A1D2E")); bannerInput.setPadding(8,8,8,8); bannerInput.setTextSize(9);
         interInput=new EditText(this); interInput.setHint("Inter ID"); interInput.setTextColor(Color.WHITE); interInput.setBackgroundColor(Color.parseColor("#1A1D2E")); interInput.setPadding(8,8,8,8); interInput.setTextSize(9);
         jsInjectInput=new EditText(this); jsInjectInput.setHint("JS Inject"); jsInjectInput.setTextColor(Color.WHITE); jsInjectInput.setBackgroundColor(Color.parseColor("#1A1D2E")); jsInjectInput.setPadding(8,8,8,8); jsInjectInput.setTextSize(9);
@@ -88,55 +88,60 @@ public class MainActivity extends Activity {
         aabCheck=new CheckBox(this); aabCheck.setText("Build AAB"); aabCheck.setChecked(false); aabCheck.setTextColor(Color.parseColor("#FFD700")); aabCheck.setTextSize(11);
         Button pickBtn=makeBtn("1. PILIH HTML/ZIP"); pickBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("*/*"); i.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"text/html","application/zip","*/*"}); startActivityForResult(i,PICK_FILE); }});
         Button iconBtn=makeBtn("2. PILIH ICON"); iconBtn.setBackgroundColor(Color.parseColor("#FF6B6B")); iconBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("image/*"); startActivityForResult(i,PICK_ICON); }});
-        Button buildBtn=makeBtn("3. BUILD APK -> DOWNLOAD"); buildBtn.setBackgroundColor(Color.parseColor("#00D084")); buildBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ if(selectedFile==null){ toast("Pilih file dulu!"); return; } buildV98(false); }});
-        logView=new TextView(this); logView.setText("V9.8 LOG:\n- Support 10-21 huruf\n- com.sigit.dadu = jadi com.sigit.daduaaaaaaa (21)\n- 100% install bareng Builder B\n"); logView.setTextColor(Color.parseColor("#8B8FA8")); logView.setTextSize(9); logView.setPadding(8,8,8,8); logView.setBackgroundColor(Color.parseColor("#1A1D2E"));
+        Button buildBtn=makeBtn("3. BUILD APK -> DOWNLOAD"); buildBtn.setBackgroundColor(Color.parseColor("#00D084")); buildBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ if(selectedFile==null){ toast("Pilih file dulu!"); return; } buildV99(false); }});
+        logView=new TextView(this); logView.setText("V9.9 LOG:\n- Cari UTF-8 + UTF-16\n- Ganti semua kemunculan\n- 21 char fixed\n"); logView.setTextColor(Color.parseColor("#8B8FA8")); logView.setTextSize(9); logView.setPadding(8,8,8,8); logView.setBackgroundColor(Color.parseColor("#1A1D2E"));
         root.addView(title); root.addView(appNameInput); root.addView(packageInput); root.addView(bannerInput); root.addView(interInput); root.addView(jsInjectInput); root.addView(splashCheck); root.addView(fileCheck); root.addView(adsCheck); root.addView(aabCheck); root.addView(pickBtn); root.addView(iconBtn); root.addView(buildBtn); root.addView(logView);
         ScrollView sv=new ScrollView(this); sv.addView(root); setContentView(sv);
     }
-    // V9.8: Fixed 21 char - pad with 'a' to keep binary valid
-    byte[] patchManifestV98(byte[] data, String oldPkg, String newPkg) throws Exception{
-        String baseOld="com.raynanapk.builder"; // 21
-        // Buat new 21 char: potong atau pad dengan 'a'
-        String padded=newPkg;
-        if(padded.length()>21) padded=padded.substring(0,21);
-        while(padded.length()<21) padded=padded+"a";
-        byte[] oldUtf16=new byte[baseOld.length()*2];
-        byte[] newUtf16=new byte[21*2];
-        for(int k=0;k<baseOld.length();k++){ oldUtf16[k*2]=(byte)baseOld.charAt(k); oldUtf16[k*2+1]=0; }
-        for(int k=0;k<21;k++){ newUtf16[k*2]=(byte)padded.charAt(k); newUtf16[k*2+1]=0; }
+    byte[] patchManifestV99(byte[] data, String newPkg21) throws Exception{
+        String oldPkg="com.raynanapk.builder";
+        int count=0;
+        // UTF-8 replace all
+        byte[] oldUtf8=oldPkg.getBytes("UTF-8");
+        byte[] newUtf8=newPkg21.getBytes("UTF-8");
+        for(int i=0;i<=data.length-oldUtf8.length;i++){
+            boolean m=true; for(int j=0;j<oldUtf8.length;j++) if(data[i+j]!=oldUtf8[j]){m=false;break;}
+            if(m){
+                for(int j=0;j<oldUtf8.length;j++) data[i+j]=newUtf8[j];
+                count++; i+=oldUtf8.length-1;
+            }
+        }
+        // UTF-16LE replace all
+        byte[] oldUtf16=new byte[oldPkg.length()*2];
+        byte[] newUtf16=new byte[newPkg21.length()*2];
+        for(int k=0;k<oldPkg.length();k++){ oldUtf16[k*2]=(byte)oldPkg.charAt(k); oldUtf16[k*2+1]=0; }
+        for(int k=0;k<newPkg21.length();k++){ newUtf16[k*2]=(byte)newPkg21.charAt(k); newUtf16[k*2+1]=0; }
         for(int i=0;i<=data.length-oldUtf16.length;i++){
             boolean m=true; for(int j=0;j<oldUtf16.length;j++) if(data[i+j]!=oldUtf16[j]){m=false;break;}
             if(m){
-                // Ganti 21 char, panjang tetap 21 - tidak ubah length field!
                 for(int j=0;j<newUtf16.length;j++) data[i+j]=newUtf16[j];
-                break;
+                count++; i+=oldUtf16.length-1;
             }
         }
         return data;
     }
-    void buildV98(final boolean buildAAB){
+    void buildV99(final boolean buildAAB){
         new Thread(new Runnable(){
             public void run(){
             try{
-                runOnUiThread(new Runnable(){ public void run(){ log("\nBUILDING V9.8..."); } });
+                runOnUiThread(new Runnable(){ public void run(){ log("\nBUILDING V9.9..."); } });
                 File outDir=new File(getExternalFilesDir(null),"BuilderB_Output"); outDir.mkdirs();
                 String appName=appNameInput.getText().toString(); if(appName.isEmpty()) appName="dadu";
-                String finalPackage=packageInput.getText().toString().trim().toLowerCase();
-                if(finalPackage.isEmpty()) finalPackage="com.sigit.dadu";
-                // Pad to 21 for binary
-                String padded=finalPackage;
+                String inputPkg=packageInput.getText().toString().trim().toLowerCase();
+                if(inputPkg.isEmpty()) inputPkg="com.sigit.dadu";
+                String padded=inputPkg;
                 if(padded.length()>21) padded=padded.substring(0,21);
                 while(padded.length()<21) padded=padded+"a";
-                final String fpLog=finalPackage; final String padLog=padded;
-                runOnUiThread(new Runnable(){ public void run(){ log("Input: "+fpLog+" ("+fpLog.length()+")\nPadded 21: "+padLog); } });
-                File unsigned=new File(outDir,appName+"_unsigned.apk"); File signed=new File(outDir,appName+"_V9.8.apk");
+                final String fpLog=inputPkg; final String padLog=padded;
+                runOnUiThread(new Runnable(){ public void run(){ log("Input: "+fpLog+"\nFinal 21: "+padLog); } });
+                File unsigned=new File(outDir,appName+"_unsigned.apk"); File signed=new File(outDir,appName+"_V9.9.apk");
                 String srcApk=getPackageCodePath(); ZipFile srcZip=new ZipFile(srcApk); ZipOutputStream zos=new ZipOutputStream(new FileOutputStream(unsigned));
                 Enumeration en=srcZip.entries(); while(en.hasMoreElements()){ ZipEntry e=(ZipEntry)en.nextElement(); String n=e.getName(); if(n.startsWith("assets/www/")) continue; if(n.startsWith("META-INF/")) continue; if(selectedIcon!=null && n.contains("ic_launcher") && n.endsWith(".png")) continue; zos.putNextEntry(new ZipEntry(n)); InputStream is=srcZip.getInputStream(e); byte[] b=new byte[8192]; int l; while((l=is.read(b))>0) zos.write(b,0,l); zos.closeEntry(); is.close(); } srcZip.close();
                 zos.putNextEntry(new ZipEntry("assets/www/")); zos.closeEntry();
                 if(selectedFile.getName().endsWith(".zip")){ ZipFile uz=new ZipFile(selectedFile); Enumeration ue=uz.entries(); while(ue.hasMoreElements()){ ZipEntry ze=(ZipEntry)ue.nextElement(); if(ze.isDirectory()) continue; zos.putNextEntry(new ZipEntry("assets/www/"+ze.getName())); InputStream iis=uz.getInputStream(ze); byte[] bb=new byte[8192]; int ll; while((ll=iis.read(bb))>0) zos.write(bb,0,ll); zos.closeEntry(); iis.close(); } uz.close(); }else{ zos.putNextEntry(new ZipEntry("assets/www/index.html")); FileInputStream fis=new FileInputStream(selectedFile); byte[] bb=new byte[8192]; int ll; while((ll=fis.read(bb))>0) zos.write(bb,0,ll); zos.closeEntry(); fis.close(); }
                 if(selectedIcon!=null){ String[] paths={"res/mipmap-hdpi-v4/ic_launcher.png","res/mipmap-mdpi-v4/ic_launcher.png","res/mipmap-xhdpi-v4/ic_launcher.png","res/mipmap-xxhdpi-v4/ic_launcher.png","res/mipmap-xxxhdpi-v4/ic_launcher.png","res/mipmap-hdpi-v4/ic_launcher_round.png"}; for(String p:paths){ try{ zos.putNextEntry(new ZipEntry(p)); FileInputStream fis=new FileInputStream(selectedIcon); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) zos.write(b,0,l); zos.closeEntry(); fis.close(); }catch(Exception ex){} } zos.putNextEntry(new ZipEntry("assets/www/icon.png")); FileInputStream fis=new FileInputStream(selectedIcon); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) zos.write(b,0,l); zos.closeEntry(); fis.close(); }
                 String jsEsc=jsInjectInput.getText().toString().replace("\"","\\\"");
-                String config="{\"appName\":\""+appName+"\",\"package\":\""+finalPackage+"\",\"padded\":\""+padded+"\",\"splash\":"+splashCheck.isChecked()+",\"ads\":"+adsCheck.isChecked()+",\"bannerId\":\""+bannerInput.getText()+"\",\"interId\":\""+interInput.getText()+"\",\"jsInject\":\""+jsEsc+"\",\"version\":\"V9.8\"}";
+                String config="{\"appName\":\""+appName+"\",\"package\":\""+inputPkg+"\",\"padded\":\""+padded+"\",\"version\":\"V9.9\"}";
                 zos.putNextEntry(new ZipEntry("assets/www/__builder_config.json")); zos.write(config.getBytes()); zos.closeEntry(); zos.close();
                 try{
                     ZipFile zf=new ZipFile(unsigned);
@@ -146,7 +151,7 @@ public class MainActivity extends Activity {
                     byte[] buf=new byte[8192]; int len; while((len=mis.read(buf))>0) baos.write(buf,0,len);
                     mis.close(); zf.close();
                     byte[] manBytes=baos.toByteArray();
-                    manBytes=patchManifestV98(manBytes,"com.raynanapk.builder",finalPackage);
+                    manBytes=patchManifestV99(manBytes,padded);
                     File patched=new File(outDir,appName+"_patched.apk");
                     ZipFile z2=new ZipFile(unsigned);
                     ZipOutputStream zos2=new ZipOutputStream(new FileOutputStream(patched));
@@ -160,12 +165,12 @@ public class MainActivity extends Activity {
                     }
                     z2.close(); zos2.close();
                     unsigned=patched;
-                    runOnUiThread(new Runnable(){ public void run(){ log("MANIFEST FIX 21 CHAR OK: "+padLog); } });
+                    runOnUiThread(new Runnable(){ public void run(){ log("MANIFEST PATCH OK: "+padLog+" (replaced all)"); } });
                 }catch(Exception me){ final String em=me.getMessage(); runOnUiThread(new Runnable(){ public void run(){ log("Patch fail: "+em); } }); }
                 try{ Security.removeProvider("BC"); }catch(Exception e){}
                 BouncyCastleProvider bcProvider = new BouncyCastleProvider(); Security.addProvider(bcProvider);
                 KeyPairGenerator kpg=KeyPairGenerator.getInstance("RSA",bcProvider); kpg.initialize(2048); KeyPair kp=kpg.generateKeyPair();
-                X500Principal issuer=new X500Principal("CN=BuilderB V9.8");
+                X500Principal issuer=new X500Principal("CN=BuilderB V9.9");
                 ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").setProvider(bcProvider).build(kp.getPrivate());
                 JcaX509v3CertificateBuilder certBuilder=new JcaX509v3CertificateBuilder(issuer, BigInteger.valueOf(System.currentTimeMillis()), new Date(System.currentTimeMillis()-100000), new Date(System.currentTimeMillis()+365L*24*3600*1000*3), issuer, kp.getPublic());
                 X509Certificate cert=new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(signer));
@@ -175,7 +180,7 @@ public class MainActivity extends Activity {
                 try{
                     File dlDir=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                     dlDir.mkdirs();
-                    downloadFile=new File(dlDir, appName+"_"+fpLog.replace(".","_")+"-V9.8.apk");
+                    downloadFile=new File(dlDir, appName+"_"+fpLog.replace(".","_")+"-V9.9.apk");
                     FileInputStream fis=new FileInputStream(signed);
                     FileOutputStream fos=new FileOutputStream(downloadFile);
                     byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) fos.write(b,0,l);
@@ -186,7 +191,7 @@ public class MainActivity extends Activity {
                 final File finalFile=downloadFile;
                 runOnUiThread(new Runnable(){
                     public void run(){
-                        log("JADI V9.8!\nPackage asli: "+fpLog+"\nPackage APK: "+padLog+" (21 char)\n100% INSTALL BARENG BUILDER B!");
+                        log("JADI V9.9! Input: "+fpLog+"\nAPK: "+padLog+"\nINSTALL BARENG BUILDER B!");
                         toast("SUKSES "+fpLog);
                         try{
                             Intent intent=new Intent(Intent.ACTION_VIEW);
