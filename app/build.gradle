@@ -6,9 +6,8 @@ android {
         applicationId "com.raynanapk.builder"
         minSdk 24
         targetSdk 34
-        versionCode 10
-        versionName "10.0-V7.1-Fixed"
-        manifestPlaceholders = [admobAppId: "ca-app-pub-3940256099942544~3347511713"]
+        versionCode 11
+        versionName "11.0-V8-Money"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -20,6 +19,5 @@ dependencies {
     implementation "com.android.tools.build:apksig:8.1.0"
     implementation "org.bouncycastle:bcprov-jdk15on:1.70"
     implementation "org.bouncycastle:bcpkix-jdk15on:1.70"
-    // AdMob optional - kalo error, comment dulu
-    // implementation "com.google.android.gms:play-services-ads:22.5.0"
+    implementation "com.google.android.gms:play-services-ads:22.5.0"
 }
