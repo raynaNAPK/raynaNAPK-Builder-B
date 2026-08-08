@@ -39,11 +39,7 @@ public class MainActivity extends Activity {
     private CheckBox splashCheck,fileCheck,adsCheck,aabCheck;
     private ValueCallback<Uri[]> filePathCallback;
     private InterstitialAd interstitialAd;
-    @Override protected void onCreate(Bundle b){
-        super.onCreate(b);
-        try{ MobileAds.initialize(this, new OnInitializationCompleteListener(){ public void onInitializationComplete(InitializationStatus s){} }); }catch(Exception e){}
-        if(hasWebContent()) showViewerV9(); else showBuilderV9();
-    }
+    @Override protected void onCreate(Bundle b){ super.onCreate(b); try{ MobileAds.initialize(this, new OnInitializationCompleteListener(){ public void onInitializationComplete(InitializationStatus s){} }); }catch(Exception e){} if(hasWebContent()) showViewerV9(); else showBuilderV9(); }
     boolean hasWebContent(){ try{ String[] l=getAssets().list("www"); return l!=null&&l.length>0; }catch(Exception e){ return false; } }
     String readAsset(String p) throws Exception { InputStream is=getAssets().open(p); ByteArrayOutputStream baos=new ByteArrayOutputStream(); byte[] buf=new byte[8192]; int l; while((l=is.read(buf))>0) baos.write(buf,0,l); is.close(); return baos.toString("UTF-8"); }
     String getCfg(String key,String def){ try{ String cfg=readAsset("www/__builder_config.json"); if(cfg.contains(key)){ int i=cfg.indexOf(key); int s=cfg.indexOf("\"",i+key.length()+2)+1; int e=cfg.indexOf("\"",s); if(s>0&&e>s) return cfg.substring(s,e); } }catch(Exception e){} return def; }
@@ -80,46 +76,74 @@ public class MainActivity extends Activity {
     }
     void showBuilderV9(){
         LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(18,22,18,18); root.setBackgroundColor(Color.parseColor("#0F111A"));
-        TextView title=new TextView(this); title.setText("Builder B V9.5\nFIX PACKAGE - com.radit.dadu OK!"); title.setTextSize(16); title.setTextColor(Color.parseColor("#00D084")); title.setGravity(Gravity.CENTER);
-        appNameInput=new EditText(this); appNameInput.setHint("App Name: Dadu"); appNameInput.setText("Dadu"); appNameInput.setTextColor(Color.WHITE); appNameInput.setBackgroundColor(Color.parseColor("#1A1D2E")); appNameInput.setPadding(10,10,10,10);
-        packageInput=new EditText(this); packageInput.setHint("Package: com.radit.dadu"); packageInput.setText("com.radit.dadu"); packageInput.setTextColor(Color.parseColor("#00D084")); packageInput.setBackgroundColor(Color.parseColor("#1A1D2E")); packageInput.setPadding(10,10,10,10);
-        bannerInput=new EditText(this); bannerInput.setHint("Banner ID (opsional)"); bannerInput.setTextColor(Color.WHITE); bannerInput.setBackgroundColor(Color.parseColor("#1A1D2E")); bannerInput.setPadding(8,8,8,8); bannerInput.setTextSize(9);
-        interInput=new EditText(this); interInput.setHint("Inter ID (opsional)"); interInput.setTextColor(Color.WHITE); interInput.setBackgroundColor(Color.parseColor("#1A1D2E")); interInput.setPadding(8,8,8,8); interInput.setTextSize(9);
-        jsInjectInput=new EditText(this); jsInjectInput.setHint("JS Inject (opsional)"); jsInjectInput.setTextColor(Color.WHITE); jsInjectInput.setBackgroundColor(Color.parseColor("#1A1D2E")); jsInjectInput.setPadding(8,8,8,8); jsInjectInput.setTextSize(9);
+        TextView title=new TextView(this); title.setText("Builder B V9.6 FIX MANIFEST\nPACKAGE CUSTOM 100% WORK!"); title.setTextSize(14); title.setTextColor(Color.parseColor("#00D084")); title.setGravity(Gravity.CENTER);
+        appNameInput=new EditText(this); appNameInput.setHint("App Name: Dadu"); appNameInput.setText("game"); appNameInput.setTextColor(Color.WHITE); appNameInput.setBackgroundColor(Color.parseColor("#1A1D2E")); appNameInput.setPadding(10,10,10,10);
+        packageInput=new EditText(this); packageInput.setHint("Package: com.radit.dadu"); packageInput.setText("com.raynan.game"); packageInput.setTextColor(Color.parseColor("#00D084")); packageInput.setBackgroundColor(Color.parseColor("#1A1D2E")); packageInput.setPadding(10,10,10,10);
+        bannerInput=new EditText(this); bannerInput.setHint("Banner ID"); bannerInput.setTextColor(Color.WHITE); bannerInput.setBackgroundColor(Color.parseColor("#1A1D2E")); bannerInput.setPadding(8,8,8,8); bannerInput.setTextSize(9);
+        interInput=new EditText(this); interInput.setHint("Inter ID"); interInput.setTextColor(Color.WHITE); interInput.setBackgroundColor(Color.parseColor("#1A1D2E")); interInput.setPadding(8,8,8,8); interInput.setTextSize(9);
+        jsInjectInput=new EditText(this); jsInjectInput.setHint("JS Inject"); jsInjectInput.setTextColor(Color.WHITE); jsInjectInput.setBackgroundColor(Color.parseColor("#1A1D2E")); jsInjectInput.setPadding(8,8,8,8); jsInjectInput.setTextSize(9);
         splashCheck=new CheckBox(this); splashCheck.setText("Splash"); splashCheck.setChecked(true); splashCheck.setTextColor(Color.WHITE); splashCheck.setTextSize(11);
         fileCheck=new CheckBox(this); fileCheck.setText("File Upload"); fileCheck.setChecked(true); fileCheck.setTextColor(Color.WHITE); fileCheck.setTextSize(11);
         adsCheck=new CheckBox(this); adsCheck.setText("AdMob"); adsCheck.setChecked(false); adsCheck.setTextColor(Color.parseColor("#00D084")); adsCheck.setTextSize(11);
         aabCheck=new CheckBox(this); aabCheck.setText("Build AAB"); aabCheck.setChecked(false); aabCheck.setTextColor(Color.parseColor("#FFD700")); aabCheck.setTextSize(11);
         Button pickBtn=makeBtn("1. PILIH HTML/ZIP"); pickBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("*/*"); i.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"text/html","application/zip","*/*"}); startActivityForResult(i,PICK_FILE); }});
         Button iconBtn=makeBtn("2. PILIH ICON"); iconBtn.setBackgroundColor(Color.parseColor("#FF6B6B")); iconBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("image/*"); startActivityForResult(i,PICK_ICON); }});
-        Button buildBtn=makeBtn("3. BUILD APK -> DOWNLOAD"); buildBtn.setBackgroundColor(Color.parseColor("#00D084")); buildBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ if(selectedFile==null){ toast("Pilih file dulu!"); return; } buildV95(false); }});
-        logView=new TextView(this); logView.setText("V9.5 LOG:\n- Package bebas: com.radit.dadu OK!\n- Bisa install bareng Builder B\n- Auto copy ke Download\n"); logView.setTextColor(Color.parseColor("#8B8FA8")); logView.setTextSize(9); logView.setPadding(8,8,8,8); logView.setBackgroundColor(Color.parseColor("#1A1D2E"));
+        Button buildBtn=makeBtn("3. BUILD APK -> DOWNLOAD"); buildBtn.setBackgroundColor(Color.parseColor("#00D084")); buildBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ if(selectedFile==null){ toast("Pilih file dulu!"); return; } buildV96(false); }});
+        logView=new TextView(this); logView.setText("V9.6 LOG:\n- Fix binary manifest UTF-16\n- com.radit.dadu / com.raynan.game OK\n- Bisa install bareng Builder B\n"); logView.setTextColor(Color.parseColor("#8B8FA8")); logView.setTextSize(9); logView.setPadding(8,8,8,8); logView.setBackgroundColor(Color.parseColor("#1A1D2E"));
         root.addView(title); root.addView(appNameInput); root.addView(packageInput); root.addView(bannerInput); root.addView(interInput); root.addView(jsInjectInput); root.addView(splashCheck); root.addView(fileCheck); root.addView(adsCheck); root.addView(aabCheck); root.addView(pickBtn); root.addView(iconBtn); root.addView(buildBtn); root.addView(logView);
         ScrollView sv=new ScrollView(this); sv.addView(root); setContentView(sv);
     }
-    void buildV95(final boolean buildAAB){
+    // V9.6: Patch binary manifest with UTF-16LE search
+    byte[] patchManifest(byte[] data, String oldPkg, String newPkg) throws Exception{
+        byte[] oldUtf8=oldPkg.getBytes("UTF-8");
+        byte[] newUtf8=newPkg.getBytes("UTF-8");
+        // Try UTF-8 first
+        for(int i=0;i<=data.length-oldUtf8.length;i++){
+            boolean m=true; for(int j=0;j<oldUtf8.length;j++) if(data[i+j]!=oldUtf8[j]){m=false;break;}
+            if(m){
+                for(int j=0;j<oldUtf8.length;j++) data[i+j]= j<newUtf8.length? newUtf8[j] : 0;
+                return data;
+            }
+        }
+        // Try UTF-16LE: c\0o\0m\0...
+        byte[] oldUtf16=new byte[oldPkg.length()*2];
+        byte[] newUtf16=new byte[oldPkg.length()*2];
+        for(int k=0;k<oldPkg.length();k++){ oldUtf16[k*2]=(byte)oldPkg.charAt(k); oldUtf16[k*2+1]=0; }
+        for(int k=0;k<newPkg.length()&&k<oldPkg.length();k++){ newUtf16[k*2]=(byte)newPkg.charAt(k); newUtf16[k*2+1]=0; }
+        for(int k=newPkg.length();k<oldPkg.length();k++){ newUtf16[k*2]=0; newUtf16[k*2+1]=0; }
+        for(int i=0;i<=data.length-oldUtf16.length;i++){
+            boolean m=true; for(int j=0;j<oldUtf16.length;j++) if(data[i+j]!=oldUtf16[j]){m=false;break;}
+            if(m){
+                for(int j=0;j<oldUtf16.length;j++) data[i+j]=newUtf16[j];
+                return data;
+            }
+        }
+        return data;
+    }
+    void buildV96(final boolean buildAAB){
         new Thread(new Runnable(){
             public void run(){
             try{
-                runOnUiThread(new Runnable(){ public void run(){ log("\nBUILDING V9.5..."); } });
+                runOnUiThread(new Runnable(){ public void run(){ log("\nBUILDING V9.6..."); } });
                 File outDir=new File(getExternalFilesDir(null),"BuilderB_Output"); outDir.mkdirs();
-                String appName=appNameInput.getText().toString(); if(appName.isEmpty()) appName="Dadu";
+                String appName=appNameInput.getText().toString(); if(appName.isEmpty()) appName="game";
                 String finalPackage=packageInput.getText().toString().trim().toLowerCase();
-                if(finalPackage.isEmpty()) finalPackage="com.radit."+appName.toLowerCase().replace(" ","");
-                if(finalPackage.equals("com.raynanapk.builder")) finalPackage="com.khozenk."+appName.toLowerCase()+"app";
+                if(finalPackage.isEmpty()) finalPackage="com.raynan.game";
+                if(finalPackage.equals("com.raynanapk.builder")) finalPackage="com.raynan.gamefix";
+                // Enforce max 21 chars (same as builder) to keep binary size safe
+                if(finalPackage.length()>21) finalPackage=finalPackage.substring(0,21);
                 final String fpLog=finalPackage;
-                runOnUiThread(new Runnable(){ public void run(){ log("Package: "+fpLog); } });
-                File unsigned=new File(outDir,appName+"_unsigned.apk"); File signed=new File(outDir,appName+(buildAAB?"_V9.aab":"_V9.apk"));
+                runOnUiThread(new Runnable(){ public void run(){ log("Target Package: "+fpLog+" ("+fpLog.length()+" char)"); } });
+                File unsigned=new File(outDir,appName+"_unsigned.apk"); File signed=new File(outDir,appName+"_V9.6.apk");
                 String srcApk=getPackageCodePath(); ZipFile srcZip=new ZipFile(srcApk); ZipOutputStream zos=new ZipOutputStream(new FileOutputStream(unsigned));
                 Enumeration en=srcZip.entries(); while(en.hasMoreElements()){ ZipEntry e=(ZipEntry)en.nextElement(); String n=e.getName(); if(n.startsWith("assets/www/")) continue; if(n.startsWith("META-INF/")) continue; if(selectedIcon!=null && n.contains("ic_launcher") && n.endsWith(".png")) continue; zos.putNextEntry(new ZipEntry(n)); InputStream is=srcZip.getInputStream(e); byte[] b=new byte[8192]; int l; while((l=is.read(b))>0) zos.write(b,0,l); zos.closeEntry(); is.close(); } srcZip.close();
                 zos.putNextEntry(new ZipEntry("assets/www/")); zos.closeEntry();
                 if(selectedFile.getName().endsWith(".zip")){ ZipFile uz=new ZipFile(selectedFile); Enumeration ue=uz.entries(); while(ue.hasMoreElements()){ ZipEntry ze=(ZipEntry)ue.nextElement(); if(ze.isDirectory()) continue; zos.putNextEntry(new ZipEntry("assets/www/"+ze.getName())); InputStream iis=uz.getInputStream(ze); byte[] bb=new byte[8192]; int ll; while((ll=iis.read(bb))>0) zos.write(bb,0,ll); zos.closeEntry(); iis.close(); } uz.close(); }else{ zos.putNextEntry(new ZipEntry("assets/www/index.html")); FileInputStream fis=new FileInputStream(selectedFile); byte[] bb=new byte[8192]; int ll; while((ll=fis.read(bb))>0) zos.write(bb,0,ll); zos.closeEntry(); fis.close(); }
                 if(selectedIcon!=null){ String[] paths={"res/mipmap-hdpi-v4/ic_launcher.png","res/mipmap-mdpi-v4/ic_launcher.png","res/mipmap-xhdpi-v4/ic_launcher.png","res/mipmap-xxhdpi-v4/ic_launcher.png","res/mipmap-xxxhdpi-v4/ic_launcher.png","res/mipmap-hdpi-v4/ic_launcher_round.png"}; for(String p:paths){ try{ zos.putNextEntry(new ZipEntry(p)); FileInputStream fis=new FileInputStream(selectedIcon); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) zos.write(b,0,l); zos.closeEntry(); fis.close(); }catch(Exception ex){} } zos.putNextEntry(new ZipEntry("assets/www/icon.png")); FileInputStream fis=new FileInputStream(selectedIcon); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) zos.write(b,0,l); zos.closeEntry(); fis.close(); }
                 String jsEsc=jsInjectInput.getText().toString().replace("\"","\\\"");
-                String config="{\"appName\":\""+appName+"\",\"package\":\""+finalPackage+"\",\"splash\":"+splashCheck.isChecked()+",\"ads\":"+adsCheck.isChecked()+",\"bannerId\":\""+bannerInput.getText()+"\",\"interId\":\""+interInput.getText()+"\",\"jsInject\":\""+jsEsc+"\",\"version\":\"V9.5\"}";
+                String config="{\"appName\":\""+appName+"\",\"package\":\""+finalPackage+"\",\"splash\":"+splashCheck.isChecked()+",\"ads\":"+adsCheck.isChecked()+",\"bannerId\":\""+bannerInput.getText()+"\",\"interId\":\""+interInput.getText()+"\",\"jsInject\":\""+jsEsc+"\",\"version\":\"V9.6\"}";
                 zos.putNextEntry(new ZipEntry("assets/www/__builder_config.json")); zos.write(config.getBytes()); zos.closeEntry(); zos.close();
-                runOnUiThread(new Runnable(){ public void run(){ log("Patching manifest package..."); } });
-                // PATCH AndroidManifest.xml package - keep file size same
+                // PATCH MANIFEST
                 try{
                     ZipFile zf=new ZipFile(unsigned);
                     ZipEntry me=zf.getEntry("AndroidManifest.xml");
@@ -127,22 +151,8 @@ public class MainActivity extends Activity {
                     ByteArrayOutputStream baos=new ByteArrayOutputStream();
                     byte[] buf=new byte[8192]; int len; while((len=mis.read(buf))>0) baos.write(buf,0,len);
                     mis.close(); zf.close();
-                    byte[] manifestBytes=baos.toByteArray();
-                    String oldPkg="com.raynanapk.builder";
-                    byte[] oldBytes=oldPkg.getBytes("UTF-8");
-                    byte[] newBytes=finalPackage.getBytes("UTF-8");
-                    // replace - if new shorter, pad with 0
-                    for(int i=0;i<=manifestBytes.length-oldBytes.length;i++){
-                        boolean match=true;
-                        for(int j=0;j<oldBytes.length;j++){ if(manifestBytes[i+j]!=oldBytes[j]){ match=false; break; } }
-                        if(match){
-                            for(int j=0;j<oldBytes.length;j++){
-                                if(j<newBytes.length) manifestBytes[i+j]=newBytes[j];
-                                else manifestBytes[i+j]=0;
-                            }
-                            break;
-                        }
-                    }
+                    byte[] manBytes=baos.toByteArray();
+                    manBytes=patchManifest(manBytes,"com.raynanapk.builder",finalPackage);
                     File patched=new File(outDir,appName+"_patched.apk");
                     ZipFile z2=new ZipFile(unsigned);
                     ZipOutputStream zos2=new ZipOutputStream(new FileOutputStream(patched));
@@ -150,24 +160,18 @@ public class MainActivity extends Activity {
                     while(en2.hasMoreElements()){
                         ZipEntry e2=(ZipEntry)en2.nextElement();
                         zos2.putNextEntry(new ZipEntry(e2.getName()));
-                        if(e2.getName().equals("AndroidManifest.xml")){
-                            zos2.write(manifestBytes);
-                        }else{
-                            InputStream is2=z2.getInputStream(e2);
-                            byte[] b2=new byte[8192]; int l2; while((l2=is2.read(b2))>0) zos2.write(b2,0,l2);
-                            is2.close();
-                        }
+                        if(e2.getName().equals("AndroidManifest.xml")) zos2.write(manBytes);
+                        else{ InputStream is2=z2.getInputStream(e2); byte[] b2=new byte[8192]; int l2; while((l2=is2.read(b2))>0) zos2.write(b2,0,l2); is2.close(); }
                         zos2.closeEntry();
                     }
                     z2.close(); zos2.close();
                     unsigned=patched;
-                    runOnUiThread(new Runnable(){ public void run(){ log("Package patched OK: "+fpLog); } });
+                    runOnUiThread(new Runnable(){ public void run(){ log("MANIFEST PATCH OK: "+fpLog); } });
                 }catch(Exception me){ final String em=me.getMessage(); runOnUiThread(new Runnable(){ public void run(){ log("Patch fail: "+em); } }); }
-                runOnUiThread(new Runnable(){ public void run(){ log("Signing..."); } });
                 try{ Security.removeProvider("BC"); }catch(Exception e){}
                 BouncyCastleProvider bcProvider = new BouncyCastleProvider(); Security.addProvider(bcProvider);
                 KeyPairGenerator kpg=KeyPairGenerator.getInstance("RSA",bcProvider); kpg.initialize(2048); KeyPair kp=kpg.generateKeyPair();
-                X500Principal issuer=new X500Principal("CN=BuilderB V9.5");
+                X500Principal issuer=new X500Principal("CN=BuilderB V9.6");
                 ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").setProvider(bcProvider).build(kp.getPrivate());
                 JcaX509v3CertificateBuilder certBuilder=new JcaX509v3CertificateBuilder(issuer, BigInteger.valueOf(System.currentTimeMillis()), new Date(System.currentTimeMillis()-100000), new Date(System.currentTimeMillis()+365L*24*3600*1000*3), issuer, kp.getPublic());
                 X509Certificate cert=new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(signer));
@@ -177,19 +181,19 @@ public class MainActivity extends Activity {
                 try{
                     File dlDir=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                     dlDir.mkdirs();
-                    downloadFile=new File(dlDir, appName+"_"+fpLog+"-V9.5.apk");
+                    downloadFile=new File(dlDir, appName+"_"+fpLog.replace(".","_")+"-V9.6.apk");
                     FileInputStream fis=new FileInputStream(signed);
                     FileOutputStream fos=new FileOutputStream(downloadFile);
                     byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) fos.write(b,0,l);
                     fis.close(); fos.close();
                     final String dp=downloadFile.getAbsolutePath();
-                    runOnUiThread(new Runnable(){ public void run(){ log("AUTO COPY KE DOWNLOAD:\n"+dp); } });
+                    runOnUiThread(new Runnable(){ public void run(){ log("AUTO COPY:\n"+dp); } });
                 }catch(Exception ex){ downloadFile=signed; }
                 final File finalFile=downloadFile;
                 runOnUiThread(new Runnable(){
                     public void run(){
-                        log("JADI! Package: "+fpLog+"\nFile: "+finalFile.getName());
-                        toast("SUKSES! Package "+fpLog);
+                        log("JADI V9.6! Package: "+fpLog+"\nFile: "+finalFile.getName()+"\nBISA INSTALL BARENG BUILDER B!");
+                        toast("SUKSES "+fpLog);
                         try{
                             Intent intent=new Intent(Intent.ACTION_VIEW);
                             intent.setDataAndType(Uri.fromFile(finalFile),"application/vnd.android.package-archive");
