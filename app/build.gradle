@@ -3,7 +3,7 @@ android {
     namespace "com.raynanapk.builder"
     compileSdk 34
     defaultConfig {
-        applicationId "com.raynanteam.style"
+        applicationId "com.raynanapk.builder"
         minSdk 24
         targetSdk 34
         versionCode 12
