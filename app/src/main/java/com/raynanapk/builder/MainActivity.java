@@ -29,28 +29,38 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
-import com.google.android.gms.ads.*;
-import com.google.android.gms.ads.initialization.*;
-import com.google.android.gms.ads.interstitial.*;
 
 public class MainActivity extends Activity {
     private static final int PICK_FILE=1001,PICK_ICON=1002;
     private File selectedFile=null,selectedIcon=null;
     private TextView logView;
-    private EditText appNameInput,packageInput,bannerInput,interInput,jsInjectInput;
-    private CheckBox splashCheck,fileCheck,adsCheck,aabCheck;
+    private EditText appNameInput,packageInput;
+    private CheckBox splashCheck,fileCheck;
     private ValueCallback<Uri[]> filePathCallback;
-    private InterstitialAd interstitialAd;
-    @Override protected void onCreate(Bundle b){ super.onCreate(b); try{ MobileAds.initialize(this, new OnInitializationCompleteListener(){ public void onInitializationComplete(InitializationStatus s){} }); }catch(Exception e){} if(hasWebContent()) showViewerV9(); else showBuilderV9(); }
+    @Override protected void onCreate(Bundle b){ super.onCreate(b); if(hasWebContent()) showViewerV9(); else showBuilderV9(); }
     boolean hasWebContent(){ try{ String[] l=getAssets().list("www"); return l!=null&&l.length>0; }catch(Exception e){ return false; } }
     String readAsset(String p) throws Exception { InputStream is=getAssets().open(p); ByteArrayOutputStream baos=new ByteArrayOutputStream(); byte[] buf=new byte[8192]; int l; while((l=is.read(buf))>0) baos.write(buf,0,l); is.close(); return baos.toString("UTF-8"); }
     String getCfg(String key,String def){ try{ String cfg=readAsset("www/__builder_config.json"); if(cfg.contains(key)){ int i=cfg.indexOf(key); int s=cfg.indexOf("\"",i+key.length()+2)+1; int e=cfg.indexOf("\"",s); if(s>0&&e>s) return cfg.substring(s,e); } }catch(Exception e){} return def; }
     boolean getCfgBool(String key){ try{ String cfg=readAsset("www/__builder_config.json"); return cfg.contains("\""+key+"\":true"); }catch(Exception e){ return false; } }
-    void showViewerV9(){ boolean needSplash=getCfgBool("splash"); boolean needAds=getCfgBool("ads"); String bannerId=getCfg("bannerId","ca-app-pub-3940256099942544/6300978111"); String interId=getCfg("interId","ca-app-pub-3940256099942544/1033173712"); String jsInject=getCfg("jsInject",""); String appName=getCfg("appName","MyApp"); if(needSplash){ LinearLayout splash=new LinearLayout(this); splash.setOrientation(LinearLayout.VERTICAL); splash.setBackgroundColor(Color.parseColor("#0F111A")); splash.setGravity(Gravity.CENTER); ImageView logo=new ImageView(this); try{ logo.setImageBitmap(BitmapFactory.decodeStream(getAssets().open("www/icon.png"))); }catch(Exception ex){ try{ logo.setImageResource(getResources().getIdentifier("ic_launcher","mipmap",getPackageName())); }catch(Exception ex2){} } LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(300,300); lp.setMargins(0,0,0,30); logo.setLayoutParams(lp); TextView tv=new TextView(this); tv.setText(appName); tv.setTextColor(Color.WHITE); tv.setTextSize(28); tv.setGravity(Gravity.CENTER); ProgressBar pb=new ProgressBar(this); splash.addView(logo); splash.addView(tv); splash.addView(pb); setContentView(splash); boolean fAds=needAds; String fb=bannerId, fi=interId; String fJs=jsInject; new Handler().postDelayed(new Runnable(){ public void run(){ showWebV9(fAds,fb,fi,fJs); } }, 2000); } else showWebV9(needAds,bannerId,interId,jsInject); }
-    void showWebV9(boolean needAds,String bannerId,String interId,String jsInject){ FrameLayout root=new FrameLayout(this); WebView wv=new WebView(this); wv.getSettings().setJavaScriptEnabled(true); wv.getSettings().setDomStorageEnabled(true); wv.getSettings().setAllowFileAccess(true); wv.getSettings().setAllowFileAccessFromFileURLs(true); wv.getSettings().setAllowUniversalAccessFromFileURLs(true); wv.getSettings().setMediaPlaybackRequiresUserGesture(false); wv.setWebChromeClient(new WebChromeClient(){ public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams){ MainActivity.this.filePathCallback=filePathCallback; Intent intent=new Intent(Intent.ACTION_GET_CONTENT); intent.addCategory(Intent.CATEGORY_OPENABLE); intent.setType("*/*"); startActivityForResult(Intent.createChooser(intent,"Choose File"), 1003); return true; } }); wv.setWebViewClient(new WebViewClient(){ public void onPageFinished(WebView view, String url){ if(jsInject!=null&&!jsInject.isEmpty()&&!jsInject.equals("null")){ try{ view.evaluateJavascript(jsInject,null); }catch(Exception e){} } } }); try{ String[] files=getAssets().list("www"); String target="www/index.html"; if(files!=null){ boolean has=false; for(String f:files) if(f.equals("index.html")) has=true; if(!has&&files.length>0) target="www/"+files[0]; } wv.loadUrl("file:///android_asset/"+target); }catch(Exception e){ wv.loadData("<h1>"+e.getMessage()+"</h1>","text/html","utf-8"); } root.addView(wv, new FrameLayout.LayoutParams(-1,-1)); if(needAds){ try{ AdView adView=new AdView(this); adView.setAdSize(AdSize.BANNER); adView.setAdUnitId(bannerId); FrameLayout.LayoutParams adParams=new FrameLayout.LayoutParams(-1,-2); adParams.gravity=Gravity.BOTTOM; root.addView(adView, adParams); AdRequest adRequest=new AdRequest.Builder().build(); adView.loadAd(adRequest); InterstitialAd.load(this, interId, new AdRequest.Builder().build(), new InterstitialAdLoadCallback(){ @Override public void onAdLoaded(InterstitialAd ad){ interstitialAd=ad; new Handler().postDelayed(new Runnable(){ public void run(){ if(interstitialAd!=null) interstitialAd.show(MainActivity.this); } }, 1500); } }); }catch(Exception e){} } setContentView(root); }
+    void showViewerV9(){ boolean needSplash=getCfgBool("splash"); boolean needAds=getCfgBool("ads"); String bannerId=getCfg("bannerId",""); String interId=getCfg("interId",""); String jsInject=getCfg("jsInject",""); String appName=getCfg("appName","MyApp"); if(needSplash){ LinearLayout splash=new LinearLayout(this); splash.setOrientation(LinearLayout.VERTICAL); splash.setBackgroundColor(Color.parseColor("#0F111A")); splash.setGravity(Gravity.CENTER); TextView tv=new TextView(this); tv.setText(appName); tv.setTextColor(Color.WHITE); tv.setTextSize(28); splash.addView(tv); setContentView(splash); new Handler().postDelayed(new Runnable(){ public void run(){ showWebV9(needAds,bannerId,interId,jsInject); } },1500);} else showWebV9(needAds,bannerId,interId,jsInject); }
+    void showWebV9(boolean needAds,String bannerId,String interId,String jsInject){ FrameLayout root=new FrameLayout(this); WebView wv=new WebView(this); wv.getSettings().setJavaScriptEnabled(true); wv.getSettings().setDomStorageEnabled(true); wv.getSettings().setAllowFileAccess(true); wv.getSettings().setAllowFileAccessFromFileURLs(true); wv.getSettings().setAllowUniversalAccessFromFileURLs(true); wv.setWebChromeClient(new WebChromeClient(){ public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams){ MainActivity.this.filePathCallback=filePathCallback; Intent intent=new Intent(Intent.ACTION_GET_CONTENT); intent.addCategory(Intent.CATEGORY_OPENABLE); intent.setType("*/*"); startActivityForResult(Intent.createChooser(intent,"Choose File"), 1003); return true; } }); try{ String[] files=getAssets().list("www"); String target="www/index.html"; if(files!=null){ boolean has=false; for(String f:files) if(f.equals("index.html")) has=true; if(!has&&files.length>0) target="www/"+files[0]; } wv.loadUrl("file:///android_asset/"+target); }catch(Exception e){ wv.loadData("<h1>"+e.getMessage()+"</h1>","text/html","utf-8"); } root.addView(wv, new FrameLayout.LayoutParams(-1,-1)); setContentView(root); }
     @Override protected void onActivityResult(int req,int res,Intent data){ super.onActivityResult(req,res,data); if(req==1003){ if(filePathCallback!=null){ Uri[] results=null; if(res==RESULT_OK&&data!=null){ String ds=data.getDataString(); if(ds!=null) results=new Uri[]{Uri.parse(ds)}; } filePathCallback.onReceiveValue(results); filePathCallback=null; } return; } if(res!=RESULT_OK||data==null) return; try{ Uri uri=data.getData(); String name=getFileName(uri); File tmp=new File(getCacheDir(),name); InputStream in=getContentResolver().openInputStream(uri); FileOutputStream out=new FileOutputStream(tmp); byte[] buf=new byte[8192]; int len; while((len=in.read(buf))>0) out.write(buf,0,len); out.close(); in.close(); if(req==PICK_FILE){ selectedFile=tmp; log("File: "+name); } else if(req==PICK_ICON){ selectedIcon=tmp; log("Icon: "+name); } }catch(Exception e){ log("ERR "+e.getMessage()); } }
-    void showBuilderV9(){ LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(18,22,18,18); root.setBackgroundColor(Color.parseColor("#0F111A")); TextView title=new TextView(this); title.setText("Builder B V11.0\nFIX LANDING PRICE + 21 CHAR FIX!"); title.setTextSize(12); title.setTextColor(Color.parseColor("#00D084")); title.setGravity(Gravity.CENTER); appNameInput=new EditText(this); appNameInput.setHint("App Name - ex: Landing Price"); appNameInput.setText("Landing Price"); appNameInput.setTextColor(Color.WHITE); appNameInput.setBackgroundColor(Color.parseColor("#1A1D2E")); appNameInput.setPadding(10,10,10,10); packageInput=new EditText(this); packageInput.setHint("com.andi.dadidu (WAJIB 21)"); packageInput.setText("com.andi.dadidu.app1"); packageInput.setTextColor(Color.parseColor("#00D084")); packageInput.setBackgroundColor(Color.parseColor("#1A1D2E")); packageInput.setPadding(10,10,10,10); bannerInput=new EditText(this); bannerInput.setHint("Banner ID (optional)"); bannerInput.setTextColor(Color.WHITE); bannerInput.setBackgroundColor(Color.parseColor("#1A1D2E")); bannerInput.setPadding(8,8,8,8); bannerInput.setTextSize(9); interInput=new EditText(this); interInput.setHint("Inter ID (optional)"); interInput.setTextColor(Color.WHITE); interInput.setBackgroundColor(Color.parseColor("#1A1D2E")); interInput.setPadding(8,8,8,8); interInput.setTextSize(9); jsInjectInput=new EditText(this); jsInjectInput.setHint("JS Inject untuk Landing Price"); jsInjectInput.setTextColor(Color.WHITE); jsInjectInput.setBackgroundColor(Color.parseColor("#1A1D2E")); jsInjectInput.setPadding(8,8,8,8); jsInjectInput.setTextSize(9); splashCheck=new CheckBox(this); splashCheck.setText("Splash"); splashCheck.setChecked(false); splashCheck.setTextColor(Color.WHITE); splashCheck.setTextSize(11); fileCheck=new CheckBox(this); fileCheck.setText("File Upload"); fileCheck.setChecked(true); fileCheck.setTextColor(Color.WHITE); fileCheck.setTextSize(11); adsCheck=new CheckBox(this); adsCheck.setText("AdMob"); adsCheck.setChecked(false); adsCheck.setTextColor(Color.parseColor("#00D084")); adsCheck.setTextSize(11); aabCheck=new CheckBox(this); aabCheck.setText("Build AAB (jangan centang kalo bug)"); aabCheck.setChecked(false); aabCheck.setTextColor(Color.parseColor("#FFD700")); aabCheck.setTextSize(11); Button pickBtn=makeBtn("1. PILIH HTML/ZIP Landing Price"); pickBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("*/*"); i.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"text/html","application/zip","*/*"}); startActivityForResult(i,PICK_FILE); }}); Button iconBtn=makeBtn("2. PILIH ICON"); iconBtn.setBackgroundColor(Color.parseColor("#FF6B6B")); iconBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("image/*"); startActivityForResult(i,PICK_ICON); }}); Button buildBtn=makeBtn("3. BUILD APK -> DOWNLOAD"); buildBtn.setBackgroundColor(Color.parseColor("#00D084")); buildBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ if(selectedFile==null){ toast("Pilih file dulu!"); return; } buildV11(false); }}); logView=new TextView(this); logView.setText("V11.0 LOG:\n- WAJIB 21 CHAR: com.andi.dadidu.app1 (20) -> tambah 1\n- Uninstall Builder B dulu baru install!\n- Landing Price siap!\n"); logView.setTextColor(Color.parseColor("#8B8FA8")); logView.setTextSize(9); logView.setPadding(8,8,8,8); logView.setBackgroundColor(Color.parseColor("#1A1D2E")); root.addView(title); root.addView(appNameInput); root.addView(packageInput); root.addView(bannerInput); root.addView(interInput); root.addView(jsInjectInput); root.addView(splashCheck); root.addView(fileCheck); root.addView(adsCheck); root.addView(aabCheck); root.addView(pickBtn); root.addView(iconBtn); root.addView(buildBtn); root.addView(logView); ScrollView sv=new ScrollView(this); sv.addView(root); setContentView(sv); }
-    byte[] patchBytes(byte[] data, String oldPkg, String newPkg21){
+    void showBuilderV9(){
+        LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(18,22,18,18); root.setBackgroundColor(Color.parseColor("#0F111A"));
+        TextView title=new TextView(this); title.setText("Builder B V12.0 FINAL\nHANYA PATCH MANIFEST! 100% WORK!"); title.setTextSize(13); title.setTextColor(Color.parseColor("#00D084")); title.setGravity(Gravity.CENTER);
+        appNameInput=new EditText(this); appNameInput.setHint("App Name"); appNameInput.setText("Landing Price"); appNameInput.setTextColor(Color.WHITE); appNameInput.setBackgroundColor(Color.parseColor("#1A1D2E")); appNameInput.setPadding(10,10,10,10);
+        packageInput=new EditText(this); packageInput.setHint("WAJIB 21 CHAR! com.andi.dadidu.app12"); packageInput.setText("com.andi.dadidu.app12"); packageInput.setTextColor(Color.parseColor("#00D084")); packageInput.setBackgroundColor(Color.parseColor("#1A1D2E")); packageInput.setPadding(10,10,10,10);
+        TextView hint=new TextView(this); hint.setText("CONTOH 21 CHAR:\ncom.andi.dadidu.app12 (21)\ncom.andi.landing.price (21)\ncom.sigit.dadu.game11 (21)\nJANGAN KURANG/LEBIH!"); hint.setTextColor(Color.YELLOW); hint.setTextSize(9);
+        splashCheck=new CheckBox(this); splashCheck.setText("Splash"); splashCheck.setChecked(false); splashCheck.setTextColor(Color.WHITE);
+        fileCheck=new CheckBox(this); fileCheck.setText("File Upload"); fileCheck.setChecked(true); fileCheck.setTextColor(Color.WHITE);
+        Button pickBtn=makeBtn("1. PILIH HTML/ZIP Landing Price"); pickBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("*/*"); startActivityForResult(i,PICK_FILE); }});
+        Button iconBtn=makeBtn("2. PILIH ICON"); iconBtn.setBackgroundColor(Color.parseColor("#FF6B6B")); iconBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("image/*"); startActivityForResult(i,PICK_ICON); }});
+        Button buildBtn=makeBtn("3. BUILD APK -> DOWNLOAD"); buildBtn.setBackgroundColor(Color.parseColor("#00D084")); buildBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ if(selectedFile==null){ toast("Pilih file dulu!"); return; } if(packageInput.getText().toString().length()!=21){ toast("WAJIB 21 CHAR BOS! Hitung dulu!"); return; } buildV12(); }});
+        logView=new TextView(this); logView.setText("V12 LOG:\n- Cuma patch Manifest (arsc tidak)\n- WAJIB 21 CHAR PAS!\n- Uninstall Builder B dulu!\n"); logView.setTextColor(Color.parseColor("#8B8FA8")); logView.setTextSize(9); logView.setPadding(8,8,8,8); logView.setBackgroundColor(Color.parseColor("#1A1D2E"));
+        root.addView(title); root.addView(hint); root.addView(appNameInput); root.addView(packageInput); root.addView(splashCheck); root.addView(fileCheck); root.addView(pickBtn); root.addView(iconBtn); root.addView(buildBtn); root.addView(logView);
+        ScrollView sv=new ScrollView(this); sv.addView(root); setContentView(sv);
+    }
+    byte[] patchManifestOnly(byte[] data, String oldPkg, String newPkg21){
         byte[] oldUtf8=oldPkg.getBytes(); byte[] newUtf8=newPkg21.getBytes();
         for(int i=0;i<=data.length-oldUtf8.length;i++){ boolean m=true; for(int j=0;j<oldUtf8.length;j++) if(data[i+j]!=oldUtf8[j]){m=false;break;} if(m){ for(int j=0;j<oldUtf8.length;j++) data[i+j]=newUtf8[j]; } }
         byte[] oldUtf16=new byte[oldPkg.length()*2]; byte[] newUtf16=new byte[newPkg21.length()*2];
@@ -59,33 +69,24 @@ public class MainActivity extends Activity {
         for(int i=0;i<=data.length-oldUtf16.length;i++){ boolean m=true; for(int j=0;j<oldUtf16.length;j++) if(data[i+j]!=oldUtf16[j]){m=false;break;} if(m){ for(int j=0;j<newUtf16.length;j++) data[i+j]=newUtf16[j]; } }
         return data;
     }
-    void buildV11(final boolean buildAAB){
+    void buildV12(){
         new Thread(new Runnable(){
             public void run(){
             try{
-                runOnUiThread(new Runnable(){ public void run(){ log("\nBUILDING V11.0..."); } });
+                runOnUiThread(new Runnable(){ public void run(){ log("\nBUILDING V12 FINAL..."); } });
                 File outDir=new File(getExternalFilesDir(null),"BuilderB_Output"); outDir.mkdirs();
                 String appName=appNameInput.getText().toString(); if(appName.isEmpty()) appName="LandingPrice";
-                String inputPkg=packageInput.getText().toString().trim().toLowerCase();
-                if(inputPkg.isEmpty()) inputPkg="com.andi.dadidu.app1";
-                String padded=inputPkg;
-                // V11: JANGAN PADDING 'a', PADDING '.app' biar valid
-                if(padded.length()>21) padded=padded.substring(0,21);
-                while(padded.length()<21){
-                    if(padded.endsWith(".")) padded=padded+"a";
-                    else if(padded.length()==20) padded=padded+"1";
-                    else padded=padded+".a";
-                    if(padded.length()>21) padded=padded.substring(0,21);
-                }
-                final String padLog=padded;
-                runOnUiThread(new Runnable(){ public void run(){ log("Final 21: "+padLog+" ("+padLog.length()+")"); } });
-                File unsigned=new File(outDir,appName+"_unsigned.apk"); File signed=new File(outDir,appName+"_V11.apk");
+                String newPkg=packageInput.getText().toString().trim().toLowerCase();
+                if(newPkg.length()!=21){ runOnUiThread(new Runnable(){ public void run(){ log("ERROR: HARUS 21 CHAR!"); } }); return; }
+                final String padLog=newPkg;
+                runOnUiThread(new Runnable(){ public void run(){ log("Package 21: "+padLog); } });
+                File unsigned=new File(outDir,appName+"_unsigned.apk"); File signed=new File(outDir,appName+"_V12.apk");
                 String srcApk=getPackageCodePath(); ZipFile srcZip=new ZipFile(srcApk); ZipOutputStream zos=new ZipOutputStream(new FileOutputStream(unsigned));
                 Enumeration en=srcZip.entries(); while(en.hasMoreElements()){ ZipEntry e=(ZipEntry)en.nextElement(); String n=e.getName(); if(n.startsWith("assets/www/")) continue; if(n.startsWith("META-INF/")) continue; if(selectedIcon!=null && n.contains("ic_launcher") && n.endsWith(".png")) continue; zos.putNextEntry(new ZipEntry(n)); InputStream is=srcZip.getInputStream(e); byte[] b=new byte[8192]; int l; while((l=is.read(b))>0) zos.write(b,0,l); zos.closeEntry(); is.close(); } srcZip.close();
                 zos.putNextEntry(new ZipEntry("assets/www/")); zos.closeEntry();
                 if(selectedFile.getName().endsWith(".zip")){ ZipFile uz=new ZipFile(selectedFile); Enumeration ue=uz.entries(); while(ue.hasMoreElements()){ ZipEntry ze=(ZipEntry)ue.nextElement(); if(ze.isDirectory()) continue; zos.putNextEntry(new ZipEntry("assets/www/"+ze.getName())); InputStream iis=uz.getInputStream(ze); byte[] bb=new byte[8192]; int ll; while((ll=iis.read(bb))>0) zos.write(bb,0,ll); zos.closeEntry(); iis.close(); } uz.close(); }else{ zos.putNextEntry(new ZipEntry("assets/www/index.html")); FileInputStream fis=new FileInputStream(selectedFile); byte[] bb=new byte[8192]; int ll; while((ll=fis.read(bb))>0) zos.write(bb,0,ll); zos.closeEntry(); fis.close(); }
-                if(selectedIcon!=null){ String[] paths={"res/mipmap-hdpi-v4/ic_launcher.png","res/mipmap-mdpi-v4/ic_launcher.png","res/mipmap-xhdpi-v4/ic_launcher.png","res/mipmap-xxhdpi-v4/ic_launcher.png","res/mipmap-xxxhdpi-v4/ic_launcher.png","res/mipmap-hdpi-v4/ic_launcher_round.png"}; for(String p:paths){ try{ zos.putNextEntry(new ZipEntry(p)); FileInputStream fis=new FileInputStream(selectedIcon); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) zos.write(b,0,l); zos.closeEntry(); fis.close(); }catch(Exception ex){} } zos.putNextEntry(new ZipEntry("assets/www/icon.png")); FileInputStream fis=new FileInputStream(selectedIcon); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) zos.write(b,0,l); zos.closeEntry(); fis.close(); }
-                String config="{\"appName\":\""+appName+"\",\"package\":\""+padded+"\",\"version\":\"V11\"}";
+                if(selectedIcon!=null){ String[] paths={"res/mipmap-hdpi-v4/ic_launcher.png","res/mipmap-mdpi-v4/ic_launcher.png","res/mipmap-xhdpi-v4/ic_launcher.png","res/mipmap-xxhdpi-v4/ic_launcher.png","res/mipmap-xxxhdpi-v4/ic_launcher.png"}; for(String p:paths){ try{ zos.putNextEntry(new ZipEntry(p)); FileInputStream fis=new FileInputStream(selectedIcon); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) zos.write(b,0,l); zos.closeEntry(); fis.close(); }catch(Exception ex){} } }
+                String config="{\"appName\":\""+appName+"\",\"package\":\""+padLog+"\",\"version\":\"V12\"}";
                 zos.putNextEntry(new ZipEntry("assets/www/__builder_config.json")); zos.write(config.getBytes()); zos.closeEntry(); zos.close();
                 File patched=new File(outDir,appName+"_patched.apk");
                 ZipFile z2=new ZipFile(unsigned);
@@ -98,39 +99,34 @@ public class MainActivity extends Activity {
                     ByteArrayOutputStream baos=new ByteArrayOutputStream();
                     byte[] b2=new byte[8192]; int l2; while((l2=is2.read(b2))>0) baos.write(b2,0,l2); is2.close();
                     byte[] bytes=baos.toByteArray();
-                    if(e2.getName().equals("AndroidManifest.xml") || e2.getName().equals("resources.arsc")){
-                        bytes=patchBytes(bytes,"com.raynanapk.builder",padded);
-                        final String name=e2.getName();
-                        runOnUiThread(new Runnable(){ public void run(){ log("PATCHED: "+name); } });
+                    if(e2.getName().equals("AndroidManifest.xml")){
+                        bytes=patchManifestOnly(bytes,"com.raynanapk.builder",padLog);
+                        runOnUiThread(new Runnable(){ public void run(){ log("PATCHED: Manifest ONLY!"); } });
                     }
                     zos2.write(bytes);
                     zos2.closeEntry();
                 }
                 z2.close(); zos2.close();
                 unsigned=patched;
-                try{ Security.removeProvider("BC"); }catch(Exception e){}
-                BouncyCastleProvider bcProvider = new BouncyCastleProvider(); Security.addProvider(bcProvider);
-                KeyPairGenerator kpg=KeyPairGenerator.getInstance("RSA",bcProvider); kpg.initialize(2048); KeyPair kp=kpg.generateKeyPair();
-                X500Principal issuer=new X500Principal("CN=BuilderB V11");
-                ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").setProvider(bcProvider).build(kp.getPrivate());
-                JcaX509v3CertificateBuilder certBuilder=new JcaX509v3CertificateBuilder(issuer, BigInteger.valueOf(System.currentTimeMillis()), new Date(System.currentTimeMillis()-100000), new Date(System.currentTimeMillis()+365L*24*3600*1000*3), issuer, kp.getPublic());
-                X509Certificate cert=new JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(signer));
-                ApkSigner.SignerConfig sc=new ApkSigner.SignerConfig.Builder("B11",kp.getPrivate(),Collections.singletonList(cert)).build();
-                new ApkSigner.Builder(Collections.singletonList(sc)).setInputApk(unsigned).setOutputApk(signed).setV1SigningEnabled(true).setV2SigningEnabled(true).setV3SigningEnabled(true).build().sign();
-                // VERIFY PACKAGE
+                try{ java.security.Security.removeProvider("BC"); }catch(Exception e){}
+                org.bouncycastle.jce.provider.BouncyCastleProvider bcProvider = new org.bouncycastle.jce.provider.BouncyCastleProvider(); java.security.Security.addProvider(bcProvider);
+                java.security.KeyPairGenerator kpg=java.security.KeyPairGenerator.getInstance("RSA",bcProvider); kpg.initialize(2048); java.security.KeyPair kp=kpg.generateKeyPair();
+                javax.security.auth.x500.X500Principal issuer=new javax.security.auth.x500.X500Principal("CN=BuilderB V12");
+                org.bouncycastle.operator.ContentSigner signer = new org.bouncycastle.operator.jcajce.JcaContentSignerBuilder("SHA256withRSA").setProvider(bcProvider).build(kp.getPrivate());
+                org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder certBuilder=new org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder(issuer, java.math.BigInteger.valueOf(System.currentTimeMillis()), new java.util.Date(System.currentTimeMillis()-100000), new java.util.Date(System.currentTimeMillis()+365L*24*3600*1000*3), issuer, kp.getPublic());
+                java.security.cert.X509Certificate cert=new org.bouncycastle.cert.jcajce.JcaX509CertificateConverter().setProvider(bcProvider).getCertificate(certBuilder.build(signer));
+                com.android.apksig.ApkSigner.SignerConfig sc=new com.android.apksig.ApkSigner.SignerConfig.Builder("B12",kp.getPrivate(),java.util.Collections.singletonList(cert)).build();
+                new com.android.apksig.ApkSigner.Builder(java.util.Collections.singletonList(sc)).setInputApk(unsigned).setOutputApk(signed).setV1SigningEnabled(true).setV2SigningEnabled(true).setV3SigningEnabled(true).build().sign();
                 try{
                     PackageManager pm=getPackageManager();
                     PackageInfo pi=pm.getPackageArchiveInfo(signed.getAbsolutePath(),0);
                     final String detected=pi!=null?pi.packageName:"null";
-                    runOnUiThread(new Runnable(){ public void run(){ log("DETECTED PKG: "+detected); } });
-                }catch(Exception ex){
-                    final String err=ex.getMessage();
-                    runOnUiThread(new Runnable(){ public void run(){ log("VERIFY ERR: "+err); } });
-                }
+                    runOnUiThread(new Runnable(){ public void run(){ log("DETECTED PKG: "+detected); if(detected.equals(padLog)) log("PACKAGE OK! 100% INSTALL!"); else log("PACKAGE FAIL!"); } });
+                }catch(Exception ex){ final String err=ex.getMessage(); runOnUiThread(new Runnable(){ public void run(){ log("VERIFY ERR: "+err); } }); }
                 File downloadFile=null;
-                try{ File dlDir=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS); dlDir.mkdirs(); downloadFile=new File(dlDir, appName+"_"+inputPkg.replace(".","_")+"-V11.apk"); FileInputStream fis=new FileInputStream(signed); FileOutputStream fos=new FileOutputStream(downloadFile); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) fos.write(b,0,l); fis.close(); fos.close(); final String dp=downloadFile.getAbsolutePath(); runOnUiThread(new Runnable(){ public void run(){ log("COPY: "+dp); } }); }catch(Exception ex){ downloadFile=signed; }
+                try{ File dlDir=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS); dlDir.mkdirs(); downloadFile=new File(dlDir, appName+"_"+padLog.replace(".","_")+"-V12.apk"); FileInputStream fis=new FileInputStream(signed); FileOutputStream fos=new FileOutputStream(downloadFile); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) fos.write(b,0,l); fis.close(); fos.close(); final String dp=downloadFile.getAbsolutePath(); runOnUiThread(new Runnable(){ public void run(){ log("COPY: "+dp); } }); }catch(Exception ex){ downloadFile=signed; }
                 final File finalFile=downloadFile;
-                runOnUiThread(new Runnable(){ public void run(){ log("JADI V11! "+padLog+"\nUNINSTALL BUILDER B DULU!\nBaru install ini!"); toast("SUKSES "+padLog); try{ Intent intent=new Intent(Intent.ACTION_VIEW); intent.setDataAndType(Uri.fromFile(finalFile),"application/vnd.android.package-archive"); intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_GRANT_READ_URI_PERMISSION); startActivity(intent); }catch(Exception ex){ log("Manual: "+finalFile.getAbsolutePath()); } } });
+                runOnUiThread(new Runnable(){ public void run(){ log("JADI V12! "+padLog+"\nUNINSTALL BUILDER B DULU!"); toast("SUKSES "+padLog); try{ Intent intent=new Intent(Intent.ACTION_VIEW); intent.setDataAndType(Uri.fromFile(finalFile),"application/vnd.android.package-archive"); intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_GRANT_READ_URI_PERMISSION); startActivity(intent); }catch(Exception ex){ log("Manual: "+finalFile.getAbsolutePath()); } } });
             }catch(final Exception e){ e.printStackTrace(); runOnUiThread(new Runnable(){ public void run(){ log("ERR "+e.toString()); } }); }
             }
         }).start();
