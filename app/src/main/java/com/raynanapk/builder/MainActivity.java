@@ -45,16 +45,16 @@ public class MainActivity extends Activity {
     @Override protected void onActivityResult(int req,int res,Intent data){ super.onActivityResult(req,res,data); if(req==1003){ if(filePathCallback!=null){ Uri[] results=null; if(res==RESULT_OK&&data!=null){ String ds=data.getDataString(); if(ds!=null) results=new Uri[]{Uri.parse(ds)}; } filePathCallback.onReceiveValue(results); filePathCallback=null; } return; } if(res!=RESULT_OK||data==null) return; try{ Uri uri=data.getData(); String name=getFileName(uri); File tmp=new File(getCacheDir(),name); InputStream in=getContentResolver().openInputStream(uri); FileOutputStream out=new FileOutputStream(tmp); byte[] buf=new byte[8192]; int len; while((len=in.read(buf))>0) out.write(buf,0,len); out.close(); in.close(); if(req==PICK_FILE){ selectedFile=tmp; log("File: "+name); } else if(req==PICK_ICON){ selectedIcon=tmp; log("Icon: "+name); } }catch(Exception e){ log("ERR "+e.getMessage()); } }
     void showBuilderV9(){
         LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(18,22,18,18); root.setBackgroundColor(Color.parseColor("#0F111A"));
-        TextView title=new TextView(this); title.setText("Builder B V13 ULTIMATE\nFIX INSTALL 100%! LANDING READY!"); title.setTextSize(11); title.setTextColor(Color.parseColor("#00D084")); title.setGravity(Gravity.CENTER);
-        appNameInput=new EditText(this); appNameInput.setHint("Landing Price / Dadidu"); appNameInput.setText("Landing Price"); appNameInput.setTextColor(Color.WHITE); appNameInput.setBackgroundColor(Color.parseColor("#1A1D2E")); appNameInput.setPadding(10,10,10,10);
-        packageInput=new EditText(this); packageInput.setHint("com.andi.dadido.app12 (21 WAJIB)"); packageInput.setText("com.andi.dadido.app12"); packageInput.setTextColor(Color.parseColor("#00D084")); packageInput.setBackgroundColor(Color.parseColor("#1A1D2E")); packageInput.setPadding(10,10,10,10);
-        TextView hint=new TextView(this); hint.setText("V13: Hapus fileprovider + lib bentrok\n21 CHAR WAJIB! Uninstall Builder B dulu!\nLanding Price siap jualan!"); hint.setTextColor(Color.YELLOW); hint.setTextSize(9);
-        splashCheck=new CheckBox(this); splashCheck.setText("Splash OFF untuk Landing"); splashCheck.setChecked(false); splashCheck.setTextColor(Color.WHITE);
+        TextView title=new TextView(this); title.setText("Builder B V13.1 FIX BUILD\nLANDING PRICE READY!"); title.setTextSize(11); title.setTextColor(Color.parseColor("#00D084")); title.setGravity(Gravity.CENTER);
+        appNameInput=new EditText(this); appNameInput.setHint("Landing Price"); appNameInput.setText("Landing Price"); appNameInput.setTextColor(Color.WHITE); appNameInput.setBackgroundColor(Color.parseColor("#1A1D2E")); appNameInput.setPadding(10,10,10,10);
+        packageInput=new EditText(this); packageInput.setHint("com.andi.dadido.app12 (21)"); packageInput.setText("com.andi.dadido.app12"); packageInput.setTextColor(Color.parseColor("#00D084")); packageInput.setBackgroundColor(Color.parseColor("#1A1D2E")); packageInput.setPadding(10,10,10,10);
+        TextView hint=new TextView(this); hint.setText("V13.1: Compile fix, hapus fileprovider conflict\n21 CHAR WAJIB!"); hint.setTextColor(Color.YELLOW); hint.setTextSize(9);
+        splashCheck=new CheckBox(this); splashCheck.setText("Splash OFF"); splashCheck.setChecked(false); splashCheck.setTextColor(Color.WHITE);
         fileCheck=new CheckBox(this); fileCheck.setText("File Upload ON"); fileCheck.setChecked(true); fileCheck.setTextColor(Color.WHITE);
         Button pickBtn=makeBtn("1. PILIH HTML/ZIP Landing Price"); pickBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("*/*"); startActivityForResult(i,PICK_FILE); }});
         Button iconBtn=makeBtn("2. PILIH ICON"); iconBtn.setBackgroundColor(Color.parseColor("#FF6B6B")); iconBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT); i.addCategory(Intent.CATEGORY_OPENABLE); i.setType("image/*"); startActivityForResult(i,PICK_ICON); }});
-        Button buildBtn=makeBtn("3. BUILD APK V13 -> DOWNLOAD"); buildBtn.setBackgroundColor(Color.parseColor("#00D084")); buildBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ if(selectedFile==null){ toast("Pilih file dulu!"); return; } if(packageInput.getText().toString().length()!=21){ toast("WAJIB 21 CHAR!"); return; } buildV13(); }});
-        logView=new TextView(this); logView.setText("V13 LOG:\n- Hapus fileprovider conflict\n- Skip lib/*.so bentrok\n- Landing Price FIX\n"); logView.setTextColor(Color.parseColor("#8B8FA8")); logView.setTextSize(9); logView.setPadding(8,8,8,8); logView.setBackgroundColor(Color.parseColor("#1A1D2E"));
+        Button buildBtn=makeBtn("3. BUILD APK V13.1 -> DOWNLOAD"); buildBtn.setBackgroundColor(Color.parseColor("#00D084")); buildBtn.setOnClickListener(new View.OnClickListener(){ public void onClick(View v){ if(selectedFile==null){ toast("Pilih file dulu!"); return; } if(packageInput.getText().toString().length()!=21){ toast("WAJIB 21 CHAR!"); return; } buildV13(); }});
+        logView=new TextView(this); logView.setText("V13.1 LOG:\n"); logView.setTextColor(Color.parseColor("#8B8FA8")); logView.setTextSize(9); logView.setPadding(8,8,8,8); logView.setBackgroundColor(Color.parseColor("#1A1D2E"));
         root.addView(title); root.addView(hint); root.addView(appNameInput); root.addView(packageInput); root.addView(splashCheck); root.addView(fileCheck); root.addView(pickBtn); root.addView(iconBtn); root.addView(buildBtn); root.addView(logView);
         ScrollView sv=new ScrollView(this); sv.addView(root); setContentView(sv);
     }
@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
         new Thread(new Runnable(){
             public void run(){
             try{
-                runOnUiThread(new Runnable(){ public void run(){ log("\nBUILDING V13 ULTIMATE..."); } });
+                runOnUiThread(new Runnable(){ public void run(){ log("\nBUILDING V13.1..."); } });
                 File outDir=new File(getExternalFilesDir(null),"BuilderB_Output"); outDir.mkdirs();
                 String appName=appNameInput.getText().toString(); if(appName.isEmpty()) appName="LandingPrice";
                 String newPkg=packageInput.getText().toString().trim().toLowerCase();
@@ -83,9 +83,9 @@ public class MainActivity extends Activity {
                     ZipEntry e=(ZipEntry)en.nextElement(); String n=e.getName();
                     if(n.startsWith("assets/www/")) continue;
                     if(n.startsWith("META-INF/")) continue;
-                    if(n.contains("fileprovider")) continue;
                     if(n.startsWith("lib/")) continue;
                     if(n.equals("res/xml/file_paths.xml")) continue;
+                    if(n.contains("fileprovider")) continue;
                     if(selectedIcon!=null && n.contains("ic_launcher") && n.endsWith(".png")) continue;
                     zos.putNextEntry(new ZipEntry(n)); InputStream is=srcZip.getInputStream(e); byte[] b=new byte[8192]; int l; while((l=is.read(b))>0) zos.write(b,0,l); zos.closeEntry(); is.close();
                 } srcZip.close();
@@ -101,7 +101,6 @@ public class MainActivity extends Activity {
                 while(en2.hasMoreElements()){
                     ZipEntry e2=(ZipEntry)en2.nextElement();
                     if(e2.getName().equals("res/xml/file_paths.xml")) continue;
-                    if(e2.getName().contains("fileprovider")) continue;
                     zos2.putNextEntry(new ZipEntry(e2.getName()));
                     InputStream is2=z2.getInputStream(e2);
                     ByteArrayOutputStream baos=new ByteArrayOutputStream();
@@ -109,12 +108,7 @@ public class MainActivity extends Activity {
                     byte[] bytes=baos.toByteArray();
                     if(e2.getName().equals("AndroidManifest.xml")){
                         bytes=patchManifestOnly(bytes,"com.raynanapk.builder",padLog);
-                        // HAPUS fileprovider dari manifest juga
-                        String manStr=new String(bytes);
-                        manStr=manStr.replaceAll("<provider[^>]*fileprovider[^>]*>.*?</provider>"," ");
-                        manStr=manStr.replaceAll("<provider[^>]*fileprovider[^>]*/?>"," ");
-                        bytes=manStr.getBytes();
-                        runOnUiThread(new Runnable(){ public void run(){ log("PATCHED: Manifest + hapus fileprovider"); } });
+                        runOnUiThread(new Runnable(){ public void run(){ log("PATCHED: Manifest ONLY!"); } });
                     }
                     zos2.write(bytes);
                     zos2.closeEntry();
@@ -134,12 +128,12 @@ public class MainActivity extends Activity {
                     PackageManager pm=getPackageManager();
                     PackageInfo pi=pm.getPackageArchiveInfo(signed.getAbsolutePath(),0);
                     final String detected=pi!=null?pi.packageName:"null";
-                    runOnUiThread(new Runnable(){ public void run(){ log("DETECTED PKG: "+detected); log(detected.equals(padLog)?"PACKAGE OK!":"PACKAGE FAIL!"); } });
+                    runOnUiThread(new Runnable(){ public void run(){ log("DETECTED PKG: "+detected); } });
                 }catch(Exception ex){}
                 File downloadFile=null;
                 try{ File dlDir=Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS); dlDir.mkdirs(); downloadFile=new File(dlDir, appName+"_"+padLog.replace(".","_")+"-V13.apk"); FileInputStream fis=new FileInputStream(signed); FileOutputStream fos=new FileOutputStream(downloadFile); byte[] b=new byte[8192]; int l; while((l=fis.read(b))>0) fos.write(b,0,l); fis.close(); fos.close(); final String dp=downloadFile.getAbsolutePath(); runOnUiThread(new Runnable(){ public void run(){ log("COPY: "+dp); } }); }catch(Exception ex){ downloadFile=signed; }
                 final File finalFile=downloadFile;
-                runOnUiThread(new Runnable(){ public void run(){ log("JADI V13! "+padLog+"\nUNINSTALL BUILDER B DULU BARU INSTALL!"); toast("SUKSES "+padLog); try{ Intent intent=new Intent(Intent.ACTION_VIEW); intent.setDataAndType(Uri.fromFile(finalFile),"application/vnd.android.package-archive"); intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_GRANT_READ_URI_PERMISSION); startActivity(intent); }catch(Exception ex){ log("Manual: "+finalFile.getAbsolutePath()); } } });
+                runOnUiThread(new Runnable(){ public void run(){ log("JADI V13.1! "+padLog); toast("SUKSES "+padLog); try{ Intent intent=new Intent(Intent.ACTION_VIEW); intent.setDataAndType(Uri.fromFile(finalFile),"application/vnd.android.package-archive"); intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_GRANT_READ_URI_PERMISSION); startActivity(intent); }catch(Exception ex){ log("Manual: "+finalFile.getAbsolutePath()); } } });
             }catch(final Exception e){ e.printStackTrace(); runOnUiThread(new Runnable(){ public void run(){ log("ERR "+e.toString()); } }); }
             }
         }).start();
